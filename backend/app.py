@@ -1,8 +1,8 @@
 import logging
 import os
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask import Flask, request, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import Config
 from routes.automate_routes import bp as automate_bp
@@ -21,9 +21,8 @@ def create_app(overrides=None):
     app.config.from_object(Config)
     if overrides:
         app.config.update(overrides)
-      # Derrière le proxy de l'hébergeur : lire la vraie IP du visiteur (X-Forwarded-For)
-  app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-  
+    # Derrière le proxy de l'hébergeur : lire la vraie IP du visiteur (X-Forwarded-For)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     app.extensions["automate_store"] = AutomateStore(
         app.config["AUTOMATON_TTL_SECONDS"], app.config["MAX_STORED_AUTOMATA"])
     app.extensions["rate_limiter"] = RateLimiter(
