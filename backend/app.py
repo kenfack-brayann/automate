@@ -1,9 +1,6 @@
-"""Initialisation de l'application Flask.
-
-Lancement : python app.py   (puis ouvrir http://127.0.0.1:5000)
-"""
 import logging
 import os
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask import Flask, request, send_from_directory
 
@@ -24,7 +21,9 @@ def create_app(overrides=None):
     app.config.from_object(Config)
     if overrides:
         app.config.update(overrides)
-
+      # Derrière le proxy de l'hébergeur : lire la vraie IP du visiteur (X-Forwarded-For)
+  app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+  
     app.extensions["automate_store"] = AutomateStore(
         app.config["AUTOMATON_TTL_SECONDS"], app.config["MAX_STORED_AUTOMATA"])
     app.extensions["rate_limiter"] = RateLimiter(
@@ -58,4 +57,4 @@ def create_app(overrides=None):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    create_app().run(host="0.0.0.0", port=5000, debug=False)
+    create_app().run(host="127.0.0.1", port=5000, debug=False)

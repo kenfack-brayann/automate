@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: automate-afd
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # -w 1 : un seul processus, car les automates sont stockés en mémoire
+    startCommand: gunicorn -w 1 --threads 4 --chdir backend "app:create_app()"
+    healthCheckPath: /
